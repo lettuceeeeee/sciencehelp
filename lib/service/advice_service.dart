@@ -8,7 +8,8 @@ class AdviceService {
   final HttpInstance _http;
 
   AdviceService(this._http);
-  //post
+
+  // 建议列表接口 POST
   Future<ApiResponse<PaginatedResponse<Advice>>> getAdviceList({
     String? searchTag,
     int current = 1,
@@ -17,7 +18,7 @@ class AdviceService {
     try {
       final response = await _http.post(
         '/advice',
-        data: {'searchTag': searchTag ?? '', 'current': current, 'size': size},
+        data: {'searchTag': searchTag, 'current': current, 'size': size},
       );
       return ApiResponse.fromJson(
         response.data,
@@ -31,7 +32,7 @@ class AdviceService {
     }
   }
 
-  // GET
+  // 建议详情接口 GET
   Future<ApiResponse<Advice>> getAdviceDetail(int id) async {
     try {
       final response = await _http.get('/advice/detail/$id');
