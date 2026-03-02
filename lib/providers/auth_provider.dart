@@ -84,4 +84,11 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  //cas登录
+  Future<void> setLoggedIn(bool loggedIn, String token) async {
+    _isLoggedIn = loggedIn;
+    _token = token;
+    notifyListeners();
+  }
 }
