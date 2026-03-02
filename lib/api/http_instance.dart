@@ -5,14 +5,13 @@ class HttpInstance {
   String? _token;
 
   HttpInstance() {
-    _token =
-        'eyJ0eXBlIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJjYXNJRCI6IjIwMjUwMDU1MDI1NCIsIm5hbWUiOiLnlLPnj5DmiJAiLCJleHAiOjE3NzIxMjQzMTF9.LNPMiXr_UHZDF6laoxmnXA6eXwOR1qIcBKOVf02S-_c';
+    // _token =
+    //     'eyJ0eXBlIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJjYXNJRCI6IjIwMjQwMDMwMDAwNiIsIm5hbWUiOiLlvKDpm6rnnb8iLCJleHAiOjE3NzI0NDI4ODZ9.WmMM5sHGLP6lSCD91R8u1H-wZqxh4yzG3DCur8amcJE';
     _dio = Dio(
       BaseOptions(
         baseUrl: 'http://114.215.255.190:8080',
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 30),
-        contentType: Headers.formUrlEncodedContentType, // 明确指定表单格式
       ),
     );
 
@@ -47,27 +46,35 @@ class HttpInstance {
   // POST请求
   Future<Response> post(String path, {Map<String, dynamic>? data}) async {
     try {
-      final formData = FormData();
+      // 构建 URL 参数
+      final Map<String, dynamic> queryParams = {};
+
       data?.forEach((key, value) {
         if (value is List) {
-          if (value.isEmpty) {
-            // 空列表：添加一个空字符串
-            formData.fields.add(MapEntry(key, ''));
-          } else {
-            // 非空列表：为每个元素添加同名参数
-            for (var item in value) {
-              formData.fields.add(MapEntry(key, item.toString()));
-            }
-          }
+          queryParams[key] = value.isEmpty ? '' : value.join(',');
         } else {
-          // 非列表类型
-          formData.fields.add(MapEntry(key, value.toString()));
+          queryParams[key] = value?.toString() ?? '';
         }
       });
 
-      final response = await _dio.post(path, data: formData);
+      print('POST请求: $path');
+      print('URL参数: $queryParams');
+
+      // 不设置 Content-Type，让 Dio 自动选择
+      final response = await _dio.post(
+        path,
+        queryParameters: queryParams,
+        data: null, // 请求体为 null
+        options: Options(
+          // 不设置 contentType
+          headers: {'Accept': 'application/json'},
+        ),
+      );
+
       return response;
     } on DioException catch (e) {
+      print('错误状态码: ${e.response?.statusCode}');
+      print('错误响应: ${e.response?.data}');
       throw handleDioError(e);
     }
   }
