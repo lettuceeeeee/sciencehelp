@@ -56,25 +56,15 @@ class HttpInstance {
           queryParams[key] = value?.toString() ?? '';
         }
       });
-
-      print('POST请求: $path');
-      print('URL参数: $queryParams');
-
-      // 不设置 Content-Type，让 Dio 自动选择
       final response = await _dio.post(
         path,
         queryParameters: queryParams,
-        data: null, // 请求体为 null
-        options: Options(
-          // 不设置 contentType
-          headers: {'Accept': 'application/json'},
-        ),
+        data: null,
+        options: Options(headers: {'Accept': 'application/json'}),
       );
 
       return response;
     } on DioException catch (e) {
-      print('错误状态码: ${e.response?.statusCode}');
-      print('错误响应: ${e.response?.data}');
       throw handleDioError(e);
     }
   }
