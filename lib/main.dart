@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sciencehelp/api/http_instance.dart';
+import 'package:sciencehelp/pages/cas_login_page.dart';
+import 'package:sciencehelp/providers/advice_provider.dart';
 import 'package:sciencehelp/providers/auth_provider.dart';
+import 'package:sciencehelp/service/advice_service.dart';
 import 'package:sciencehelp/service/auth_service.dart';
 import 'package:sciencehelp/service/teacher_service.dart';
 import 'package:sciencehelp/providers/teacher_provider.dart';
 import 'pages/registerpage.dart';
 import 'pages/tabpage.dart';
-import 'package:sciencehelp/service/advice_service.dart';
-import 'package:sciencehelp/providers/advice_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,12 +26,12 @@ class MyApp extends StatelessWidget {
         Provider(create: (_) => HttpInstance()),
         Provider(create: (ctx) => AuthService(ctx.read())),
         Provider(create: (ctx) => TeacherService(ctx.read())),
+        Provider(create: (ctx) => AdviceService(ctx.read())),
         // 状态管理器
         ChangeNotifierProvider(
           create: (ctx) => AuthProvider(ctx.read(), ctx.read()),
         ),
         ChangeNotifierProvider(create: (ctx) => TeacherProvider(ctx.read())),
-        Provider(create: (ctx) => AdviceService(ctx.read())),
         ChangeNotifierProvider(create: (ctx) => AdviceProvider(ctx.read())),
       ],
       child: MaterialApp(
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        home: const Tabpage(),
+        home: const LoginPage(),
         debugShowCheckedModeBanner: false,
       ),
     );
@@ -62,13 +63,13 @@ class _LoginPageState extends State<LoginPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().checkLoginStatus().then((_) {
         final auth = context.read<AuthProvider>();
-        if (auth.isLoggedIn) {
-          // 如果已登录，直接跳转到主页
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Tabpage()),
-          );
-        }
+        // if (auth.isLoggedIn) {
+        //   // 如果已登录，直接跳转到主页
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const Tabpage()),
+        //   );
+        // }
       });
     });
   }
@@ -217,14 +218,25 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: login,
+                onPressed: () async {
+                  // 打开CAS登录页面
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CasLoginPage(),
+                    ),
+                  );
+                  if (result == true && mounted) {
+                    setState(() {});
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 102, 153, 255),
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   elevation: 5,
                 ),
                 child: const Text(
-                  '登      录',
+                  '统 一 认 证 登 录',
                   style: TextStyle(fontSize: 20, color: Colors.white),
                 ),
               ),
